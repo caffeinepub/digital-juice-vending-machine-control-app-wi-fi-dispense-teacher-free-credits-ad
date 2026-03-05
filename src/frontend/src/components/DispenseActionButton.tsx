@@ -1,12 +1,11 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useDispenseViaWifi } from "../hooks/useQueries";
 import { useCreateCheckoutSession } from "../hooks/useStripeCheckout";
+import { decrementTeacherCredit } from "./TeacherAccessPanel";
 
 interface DispenseActionButtonProps {
   juice: string;
@@ -14,6 +13,7 @@ interface DispenseActionButtonProps {
   priceInCents: number;
   canProceed: boolean;
   isFreeDispense: boolean;
+  onCreditsUpdated?: () => void;
 }
 
 export default function DispenseActionButton({
@@ -22,26 +22,19 @@ export default function DispenseActionButton({
   priceInCents,
   canProceed,
   isFreeDispense,
+  onCreditsUpdated,
 }: DispenseActionButtonProps) {
-  const { identity } = useInternetIdentity();
   const createCheckoutSession = useCreateCheckoutSession();
   const dispenseViaWifi = useDispenseViaWifi();
-  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [isDispensing, setIsDispensing] = useState(false);
   const [dispenseSuccess, setDispenseSuccess] = useState(false);
 
-  const isAuthenticated = !!identity;
   const isPending = isDispensing || createCheckoutSession.isPending;
 
   const handleDispense = async () => {
     setError(null);
     setDispenseSuccess(false);
-
-    if (!isAuthenticated) {
-      setError("Please log in to dispense juice");
-      return;
-    }
 
     if (!canProceed || size === null) {
       setError("Please select both juice type and size");
@@ -53,13 +46,11 @@ export default function DispenseActionButton({
       setIsDispensing(true);
       try {
         await dispenseViaWifi.mutateAsync({ juice, size });
+        // Decrement teacher credits in localStorage and sessionStorage
+        decrementTeacherCredit();
+        onCreditsUpdated?.();
         toast.success(`Juice dispensed! Enjoy your ${juice}.`);
         setDispenseSuccess(true);
-        // Invalidate teacher free-chances queries so the UI reflects updated credits
-        queryClient.invalidateQueries({ queryKey: ["teacherFreeChances"] });
-        queryClient.invalidateQueries({
-          queryKey: ["canTeacherDispenseForFree"],
-        });
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : "Failed to dispense juice";
@@ -148,13 +139,6 @@ export default function DispenseActionButton({
         <Alert data-ocid="dispense.error_state" variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {!isAuthenticated && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Please log in to dispense juice</AlertDescription>
         </Alert>
       )}
     </div>

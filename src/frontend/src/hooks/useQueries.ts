@@ -7,6 +7,7 @@ import type {
   UserProfile,
   VendingConfig,
 } from "../backend";
+import { getDispenseDuration } from "../lib/vendingCatalog";
 import { useActor } from "./useActor";
 import { useInternetIdentity } from "./useInternetIdentity";
 
@@ -245,10 +246,11 @@ export function useDispenseViaWifi() {
         throw new Error(
           "Vending machine URL not configured. Please ask your admin to set it in Admin > Configuration.",
         );
+      const durationSeconds = getDispenseDuration(size);
       const response = await fetch(`${url}/dispense`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ juice, size }),
+        body: JSON.stringify({ juice, size, durationSeconds }),
       });
       if (!response.ok) {
         const text = await response.text();

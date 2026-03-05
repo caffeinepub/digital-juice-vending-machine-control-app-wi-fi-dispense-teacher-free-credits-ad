@@ -16,16 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AlertCircle, Droplets } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DispenseActionButton from "../components/DispenseActionButton";
 import ProfileSetupDialog from "../components/ProfileSetupDialog";
-import TeacherAccessPanel from "../components/TeacherAccessPanel";
+import TeacherAccessPanel, {
+  getTeacherSession,
+} from "../components/TeacherAccessPanel";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import {
-  useCanTeacherDispenseForFree,
-  useGetCallerUserProfile,
-  useGetPrices,
-} from "../hooks/useQueries";
+import { useGetCallerUserProfile, useGetPrices } from "../hooks/useQueries";
 import {
   JUICE_TYPES,
   SIZE_OPTIONS,
@@ -35,13 +33,10 @@ import {
 
 // Mapping of juice names to their cartoon image paths
 const JUICE_IMAGES: Record<string, string> = {
-  Maaz: "/assets/generated/juice-maaz-cartoon.dim_512x512.png",
+  Mazza: "/assets/generated/juice-mazza-cartoon.dim_512x512.png",
   Coke: "/assets/generated/juice-coke-cartoon.dim_512x512.png",
   Lime: "/assets/generated/juice-lime-cartoon.dim_512x512.png",
   Water: "/assets/generated/juice-water-cartoon.dim_512x512.png",
-  "Butter Milk": "/assets/generated/juice-butter-milk-cartoon.dim_512x512.png",
-  Slice: "/assets/generated/juice-slice-cartoon.dim_512x512.png",
-  Sprite: "/assets/generated/juice-sprite-cartoon.dim_512x512.png",
   Pepsi: "/assets/generated/juice-pepsi-cartoon.dim_512x512.png",
 };
 
@@ -53,14 +48,19 @@ export default function PurchasePage() {
     isFetched,
   } = useGetCallerUserProfile();
   const { data: prices } = useGetPrices();
-  const { data: canDispenseForFree } = useCanTeacherDispenseForFree();
 
   const [selectedJuice, setSelectedJuice] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  // Used to force re-render when teacher session changes
+  const [sessionKey, setSessionKey] = useState(0);
 
   const isAuthenticated = !!identity;
   const showProfileSetup =
     isAuthenticated && !profileLoading && isFetched && userProfile === null;
+
+  // Determine if teacher can dispense for free using sessionStorage
+  const teacherSession = getTeacherSession();
+  const isFreeDispense = !!(teacherSession && teacherSession.freeCredits > 0);
 
   // Find price for selected juice and size
   const selectedPrice = prices?.find(
@@ -71,6 +71,10 @@ export default function PurchasePage() {
 
   const priceInCents = selectedPrice ? Number(selectedPrice.price) : 0;
   const canProceed = !!(selectedJuice && selectedSize && priceInCents > 0);
+
+  const handleSessionChange = () => {
+    setSessionKey((k) => k + 1);
+  };
 
   return (
     <>
@@ -105,7 +109,7 @@ export default function PurchasePage() {
               <div className="space-y-2">
                 <Label htmlFor="juice">Juice Type</Label>
                 <Select value={selectedJuice} onValueChange={setSelectedJuice}>
-                  <SelectTrigger id="juice">
+                  <SelectTrigger id="juice" data-ocid="purchase.select">
                     {selectedJuice ? (
                       <div className="flex items-center gap-2">
                         <img
@@ -143,7 +147,7 @@ export default function PurchasePage() {
                   value={selectedSize?.toString() || ""}
                   onValueChange={(val) => setSelectedSize(Number(val))}
                 >
-                  <SelectTrigger id="size">
+                  <SelectTrigger id="size" data-ocid="purchase.select">
                     <SelectValue placeholder="Select a size" />
                   </SelectTrigger>
                   <SelectContent>
@@ -162,7 +166,7 @@ export default function PurchasePage() {
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-medium">Price:</span>
                     <Badge variant="secondary" className="text-lg px-4 py-2">
-                      {formatPrice(priceInCents)}
+                      {isFreeDispense ? "FREE" : formatPrice(priceInCents)}
                     </Badge>
                   </div>
                 </div>
@@ -181,14 +185,15 @@ export default function PurchasePage() {
           </Card>
 
           {/* Teacher Access & Dispense Card */}
-          <div className="space-y-6">
-            {isAuthenticated && <TeacherAccessPanel />}
+          <div className="space-y-6" key={sessionKey}>
+            {/* Teacher panel is always visible — teachers login here */}
+            <TeacherAccessPanel onSessionChange={handleSessionChange} />
 
             <Card>
               <CardHeader>
                 <CardTitle>Dispense</CardTitle>
                 <CardDescription>
-                  {canDispenseForFree
+                  {isFreeDispense
                     ? "Use your free teacher credit"
                     : "Payment required to dispense juice"}
                 </CardDescription>
@@ -199,7 +204,8 @@ export default function PurchasePage() {
                   size={selectedSize}
                   priceInCents={priceInCents}
                   canProceed={canProceed}
-                  isFreeDispense={canDispenseForFree ?? false}
+                  isFreeDispense={isFreeDispense}
+                  onCreditsUpdated={handleSessionChange}
                 />
               </CardContent>
             </Card>
