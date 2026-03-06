@@ -1,91 +1,64 @@
 import { Button } from "@/components/ui/button";
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { LogIn, LogOut, Settings } from "lucide-react";
-import { useAuthorization } from "../hooks/useAuthorization";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import { useGetCallerUserProfile } from "../hooks/useQueries";
+import { Link } from "@tanstack/react-router";
+import { Shield } from "lucide-react";
+import { useState } from "react";
+import AdminLoginModal from "./AdminLoginModal";
 
 export default function AppHeader() {
-  const { identity, clear, login, isLoggingIn } = useInternetIdentity();
-  const { data: userProfile } = useGetCallerUserProfile();
-  const { isAdmin } = useAuthorization();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
-  const isAuthenticated = !!identity;
-
-  const handleAuth = async () => {
-    if (isAuthenticated) {
-      await clear();
-      queryClient.clear();
-      navigate({ to: "/" });
-    } else {
-      try {
-        await login();
-      } catch (error: any) {
-        console.error("Login error:", error);
-        if (error.message === "User is already authenticated") {
-          await clear();
-          setTimeout(() => login(), 300);
-        }
-      }
-    }
-  };
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="grand-header sticky top-0 z-50 w-full">
+      <div className="container flex h-18 items-center justify-between py-3">
         <Link
           to="/"
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          className="flex items-center gap-3 hover:opacity-90 transition-opacity"
         >
-          <img
-            src="/assets/generated/vending-logo.dim_512x512.png"
-            alt="Juice Vending"
-            className="h-10 w-10"
-          />
-          <span className="font-bold text-lg">Juice Vending</span>
+          <div className="relative">
+            <img
+              src="/assets/generated/vending-logo-grand.dim_512x512.png"
+              alt="Juice Vending"
+              className="h-11 w-11 rounded-full shadow-lg border-2 glow-pulse"
+              style={{ borderColor: "oklch(0.82 0.18 85 / 0.6)" }}
+            />
+          </div>
+          <div className="flex flex-col">
+            <span
+              className="font-display font-bold text-xl leading-tight shimmer-text"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              Juice Vending
+            </span>
+            <span
+              className="text-xs font-medium leading-none"
+              style={{ color: "oklch(0.62 0.04 270)" }}
+            >
+              Smart Dispensing System
+            </span>
+          </div>
         </Link>
 
-        <div className="flex items-center gap-4">
-          {isAuthenticated && userProfile && (
-            <span className="text-sm text-muted-foreground hidden sm:inline">
-              Welcome, {userProfile.name}
-            </span>
-          )}
-
-          {isAdmin && (
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/admin">
-                <Settings className="h-4 w-4 mr-2" />
-                Admin
-              </Link>
-            </Button>
-          )}
-
+        <div className="flex items-center gap-3">
           <Button
-            onClick={handleAuth}
-            disabled={isLoggingIn}
-            variant={isAuthenticated ? "outline" : "default"}
+            data-ocid="admin_login.open_modal_button"
             size="sm"
+            onClick={() => setModalOpen(true)}
+            className="font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.82 0.18 85) 0%, oklch(0.75 0.20 75) 100%)",
+              color: "oklch(0.12 0.04 280)",
+              border: "none",
+              boxShadow: "0 2px 16px oklch(0.82 0.18 85 / 0.35)",
+            }}
           >
-            {isLoggingIn ? (
-              "Logging in..."
-            ) : isAuthenticated ? (
-              <>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </>
-            ) : (
-              <>
-                <LogIn className="h-4 w-4 mr-2" />
-                Login
-              </>
-            )}
+            <Shield className="h-4 w-4 mr-2" />
+            Admin Login
           </Button>
         </div>
       </div>
+
+      <AdminLoginModal open={modalOpen} onOpenChange={setModalOpen} />
     </header>
   );
 }

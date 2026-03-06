@@ -6,6 +6,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { GraduationCap, Trash2, UserPlus } from "lucide-react";
+import { GraduationCap, Pencil, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -43,11 +50,18 @@ export function saveTeacherAccounts(accounts: LocalTeacherAccount[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
 }
 
+interface EditState {
+  index: number;
+  name: string;
+  password: string;
+}
+
 export default function TeacherAdminManager() {
   const [accounts, setAccounts] =
     useState<LocalTeacherAccount[]>(getTeacherAccounts);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [editState, setEditState] = useState<EditState | null>(null);
 
   const handleAdd = () => {
     const trimmedName = name.trim();
@@ -88,6 +102,44 @@ export default function TeacherAdminManager() {
     saveTeacherAccounts(updated);
     setAccounts(updated);
     toast.success("Teacher account removed");
+  };
+
+  const handleEditOpen = (index: number) => {
+    setEditState({ index, name: accounts[index].name, password: "" });
+  };
+
+  const handleEditSave = () => {
+    if (!editState) return;
+    const trimmedName = editState.name.trim();
+    if (!trimmedName) {
+      toast.error("Teacher name cannot be empty");
+      return;
+    }
+    const duplicate = accounts.some(
+      (a, i) =>
+        i !== editState.index &&
+        a.name.toLowerCase() === trimmedName.toLowerCase(),
+    );
+    if (duplicate) {
+      toast.error("A teacher with this name already exists");
+      return;
+    }
+    const updated = accounts.map((a, i) => {
+      if (i !== editState.index) return a;
+      return {
+        ...a,
+        name: trimmedName,
+        password: editState.password.trim() || a.password,
+      };
+    });
+    saveTeacherAccounts(updated);
+    setAccounts(updated);
+    setEditState(null);
+    toast.success("Teacher updated");
+  };
+
+  const handleEditCancel = () => {
+    setEditState(null);
   };
 
   return (
@@ -193,15 +245,26 @@ export default function TeacherAdminManager() {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        data-ocid={`teacher.delete_button.${index + 1}`}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(index)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          data-ocid={`teacher.edit_button.${index + 1}`}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditOpen(index)}
+                          className="text-primary hover:text-primary hover:bg-primary/10"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          data-ocid={`teacher.delete_button.${index + 1}`}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(index)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -210,6 +273,71 @@ export default function TeacherAdminManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Teacher Dialog */}
+      <Dialog
+        open={editState !== null}
+        onOpenChange={(open) => !open && handleEditCancel()}
+      >
+        <DialogContent className="sm:max-w-md" data-ocid="teacher.dialog">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              Edit Teacher
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-teacher-name">Teacher Name</Label>
+              <Input
+                id="edit-teacher-name"
+                data-ocid="teacher.input"
+                value={editState?.name ?? ""}
+                onChange={(e) =>
+                  setEditState((prev) =>
+                    prev ? { ...prev, name: e.target.value } : prev,
+                  )
+                }
+                placeholder="Teacher name"
+                onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-teacher-password">
+                New Password{" "}
+                <span className="text-muted-foreground text-xs font-normal">
+                  (leave blank to keep existing)
+                </span>
+              </Label>
+              <Input
+                id="edit-teacher-password"
+                data-ocid="teacher.input"
+                type="password"
+                value={editState?.password ?? ""}
+                onChange={(e) =>
+                  setEditState((prev) =>
+                    prev ? { ...prev, password: e.target.value } : prev,
+                  )
+                }
+                placeholder="Enter new password"
+                onKeyDown={(e) => e.key === "Enter" && handleEditSave()}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              data-ocid="teacher.cancel_button"
+              variant="outline"
+              onClick={handleEditCancel}
+            >
+              Cancel
+            </Button>
+            <Button data-ocid="teacher.save_button" onClick={handleEditSave}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

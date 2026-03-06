@@ -9,8 +9,8 @@ export function formatSize(ml: number): string {
   return `${ml}ml`;
 }
 
-export function formatPrice(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+export function formatPrice(rupees: number): string {
+  return `₹${rupees}`;
 }
 
 export function getDispenseDuration(size: number): number {

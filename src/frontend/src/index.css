@@ -2,67 +2,391 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Bricolage Grotesque display font ── */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque-variable.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Cabinet Grotesk body font ── */
+@font-face {
+  font-family: "Cabinet Grotesk";
+  src: url("/assets/fonts/CabinetGrotesk-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    --radius: 0.5rem;
-    --background: 0.98 0.02 45;
-    --foreground: 0.25 0.03 30;
-    --card: 1 0 0;
-    --card-foreground: 0.25 0.03 30;
-    --popover: 1 0 0;
-    --popover-foreground: 0.25 0.03 30;
-    --primary: 0.55 0.18 35;
-    --primary-foreground: 0.98 0.02 45;
-    --secondary: 0.92 0.04 50;
-    --secondary-foreground: 0.25 0.03 30;
-    --muted: 0.94 0.03 45;
-    --muted-foreground: 0.5 0.02 30;
-    --accent: 0.75 0.15 85;
-    --accent-foreground: 0.25 0.03 30;
-    --destructive: 0.55 0.22 25;
-    --destructive-foreground: 0.98 0.02 45;
-    --border: 0.88 0.02 45;
-    --input: 0.88 0.02 45;
-    --ring: 0.55 0.18 35;
-    --chart-1: 0.6 0.2 40;
-    --chart-2: 0.65 0.18 120;
-    --chart-3: 0.7 0.15 200;
-    --chart-4: 0.55 0.22 25;
-    --chart-5: 0.75 0.15 85;
-  }
+    --radius: 1rem;
 
-  .dark {
-    --background: 0.2 0.03 30;
-    --foreground: 0.95 0.02 45;
-    --card: 0.25 0.03 30;
-    --card-foreground: 0.95 0.02 45;
-    --popover: 0.22 0.03 30;
-    --popover-foreground: 0.95 0.02 45;
-    --primary: 0.7 0.16 40;
-    --primary-foreground: 0.15 0.03 30;
-    --secondary: 0.3 0.03 35;
-    --secondary-foreground: 0.95 0.02 45;
-    --muted: 0.3 0.03 35;
-    --muted-foreground: 0.65 0.02 40;
-    --accent: 0.75 0.15 85;
-    --accent-foreground: 0.15 0.03 30;
-    --destructive: 0.6 0.24 25;
-    --destructive-foreground: 0.95 0.02 45;
-    --border: 0.35 0.03 35;
-    --input: 0.35 0.03 35;
-    --ring: 0.7 0.16 40;
-    --chart-1: 0.65 0.2 40;
-    --chart-2: 0.7 0.18 120;
-    --chart-3: 0.75 0.15 200;
-    --chart-4: 0.6 0.24 25;
-    --chart-5: 0.8 0.15 85;
+    /* ── Grand Jewel Palette ── */
+    /* Background: deep midnight navy */
+    --background: 0.13 0.04 280;
+    --foreground: 0.96 0.01 90;
+
+    /* Cards: slightly lighter navy */
+    --card: 0.17 0.04 275;
+    --card-foreground: 0.96 0.01 90;
+
+    --popover: 0.17 0.04 275;
+    --popover-foreground: 0.96 0.01 90;
+
+    /* Primary: royal gold */
+    --primary: 0.82 0.18 85;
+    --primary-foreground: 0.12 0.04 280;
+
+    /* Secondary: deep violet */
+    --secondary: 0.28 0.08 280;
+    --secondary-foreground: 0.92 0.02 90;
+
+    --muted: 0.22 0.04 275;
+    --muted-foreground: 0.62 0.04 270;
+
+    /* Accent: vivid citrus orange */
+    --accent: 0.72 0.22 50;
+    --accent-foreground: 0.1 0.02 280;
+
+    --destructive: 0.58 0.24 25;
+    --destructive-foreground: 0.96 0.01 90;
+
+    --border: 0.28 0.06 275;
+    --input: 0.28 0.06 275;
+    --ring: 0.82 0.18 85;
+
+    /* Chart colors */
+    --chart-1: 0.82 0.18 85;
+    --chart-2: 0.72 0.22 50;
+    --chart-3: 0.68 0.22 140;
+    --chart-4: 0.65 0.22 280;
+    --chart-5: 0.6 0.24 25;
+
+    /* Sidebar */
+    --sidebar: 0.1 0.04 280;
+    --sidebar-foreground: 0.96 0.01 90;
+    --sidebar-primary: 0.82 0.18 85;
+    --sidebar-primary-foreground: 0.12 0.04 280;
+    --sidebar-accent: 0.72 0.22 50;
+    --sidebar-accent-foreground: 0.1 0.02 280;
+    --sidebar-border: 0.25 0.06 275;
+    --sidebar-ring: 0.82 0.18 85;
   }
 
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Cabinet Grotesk", ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* ── Grand dark background ── */
+.grand-bg {
+  min-height: 100vh;
+  background: radial-gradient(
+      ellipse at 20% 0%,
+      oklch(0.3 0.12 280 / 0.5) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 80% 0%,
+      oklch(0.25 0.1 50 / 0.4) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      oklch(0.2 0.08 140 / 0.3) 0%,
+      transparent 60%
+    ), oklch(0.1 0.04 280);
+}
+
+/* ── Starfield sparkle overlay ── */
+.grand-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(
+      1px 1px at 10% 15%,
+      oklch(0.9 0.12 85 / 0.6) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 25% 35%,
+      oklch(0.9 0.12 85 / 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1.5px 1.5px at 45% 8%,
+      oklch(0.9 0.12 85 / 0.7) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 60% 22%,
+      oklch(0.9 0.12 85 / 0.5) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 75% 10%,
+      oklch(0.9 0.12 85 / 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1.5px 1.5px at 90% 30%,
+      oklch(0.9 0.12 85 / 0.6) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 15% 55%,
+      oklch(0.9 0.12 85 / 0.3) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 35% 70%,
+      oklch(0.9 0.12 85 / 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1.5px 1.5px at 55% 50%,
+      oklch(0.9 0.12 85 / 0.5) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 80% 65%,
+      oklch(0.9 0.12 85 / 0.35) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 5% 85%,
+      oklch(0.9 0.12 85 / 0.5) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      1px 1px at 95% 80%,
+      oklch(0.9 0.12 85 / 0.4) 0%,
+      transparent 100%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Gold shimmer card ── */
+.grand-card {
+  background: linear-gradient(
+    135deg,
+    oklch(0.18 0.05 275) 0%,
+    oklch(0.15 0.04 280) 100%
+  );
+  border: 1px solid oklch(0.82 0.18 85 / 0.2);
+  box-shadow: 0 0 0 1px oklch(0.82 0.18 85 / 0.08), 0 8px 32px
+    oklch(0.1 0.04 280 / 0.6), 0 2px 8px oklch(0.1 0.04 280 / 0.4), inset 0 1px
+    0 oklch(0.82 0.18 85 / 0.12);
+}
+
+.grand-card:hover {
+  border-color: oklch(0.82 0.18 85 / 0.35);
+  box-shadow: 0 0 0 1px oklch(0.82 0.18 85 / 0.15), 0 12px 40px
+    oklch(0.1 0.04 280 / 0.7), 0 4px 12px oklch(0.1 0.04 280 / 0.5), inset 0 1px
+    0 oklch(0.82 0.18 85 / 0.18);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── Header gold gradient ── */
+.grand-header {
+  background: linear-gradient(
+    135deg,
+    oklch(0.11 0.05 280) 0%,
+    oklch(0.14 0.06 275) 50%,
+    oklch(0.11 0.05 280) 100%
+  );
+  border-bottom: 1px solid oklch(0.82 0.18 85 / 0.25);
+  box-shadow: 0 4px 24px oklch(0.1 0.04 280 / 0.8);
+}
+
+/* ── Gold text ── */
+.gold-text {
+  background: linear-gradient(
+    135deg,
+    oklch(0.9 0.18 90) 0%,
+    oklch(0.82 0.2 75) 40%,
+    oklch(0.88 0.16 100) 70%,
+    oklch(0.82 0.18 80) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Juice card selection ── */
+.juice-card-selected {
+  border-color: oklch(0.82 0.18 85 / 0.8) !important;
+  box-shadow: 0 0 0 2px oklch(0.82 0.18 85 / 0.4), 0 8px 32px
+    oklch(0.1 0.04 280 / 0.5), 0 0 20px oklch(0.82 0.18 85 / 0.15);
+}
+
+/* ── Juice image bounce-in ── */
+@keyframes juice-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.1) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.juice-pop-enter {
+  animation: juice-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Juice floating ── */
+@keyframes juice-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.juice-float {
+  animation: juice-float 3s ease-in-out infinite;
+}
+.juice-float-d1 {
+  animation-delay: 0s;
+}
+.juice-float-d2 {
+  animation-delay: 0.4s;
+}
+.juice-float-d3 {
+  animation-delay: 0.8s;
+}
+.juice-float-d4 {
+  animation-delay: 1.2s;
+}
+.juice-float-d5 {
+  animation-delay: 1.6s;
+}
+
+/* ── Gold shimmer animation on hero ── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    oklch(0.82 0.18 85) 0%,
+    oklch(0.96 0.1 90) 30%,
+    oklch(0.82 0.18 85) 50%,
+    oklch(0.9 0.2 80) 70%,
+    oklch(0.82 0.18 85) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Pulse glow ── */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 16px oklch(0.82 0.18 85 / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 32px oklch(0.82 0.18 85 / 0.6), 0 0 60px
+      oklch(0.82 0.18 85 / 0.2);
+  }
+}
+
+.glow-pulse {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Size button styles ── */
+.size-btn-60 {
+  background: linear-gradient(
+    135deg,
+    oklch(0.55 0.22 270),
+    oklch(0.45 0.24 285)
+  );
+  color: white;
+  border: 1px solid oklch(0.65 0.2 270 / 0.5);
+}
+.size-btn-120 {
+  background: linear-gradient(
+    135deg,
+    oklch(0.58 0.22 145),
+    oklch(0.48 0.24 155)
+  );
+  color: white;
+  border: 1px solid oklch(0.68 0.2 145 / 0.5);
+}
+.size-btn-180 {
+  background: linear-gradient(135deg, oklch(0.68 0.22 55), oklch(0.58 0.24 45));
+  color: white;
+  border: 1px solid oklch(0.75 0.2 55 / 0.5);
+}
+.size-btn-240 {
+  background: linear-gradient(135deg, oklch(0.58 0.24 30), oklch(0.48 0.26 20));
+  color: white;
+  border: 1px solid oklch(0.65 0.22 30 / 0.5);
+}
+.size-btn-60:hover {
+  background: linear-gradient(135deg, oklch(0.48 0.24 270), oklch(0.4 0.26 285));
+}
+.size-btn-120:hover {
+  background: linear-gradient(
+    135deg,
+    oklch(0.52 0.24 145),
+    oklch(0.44 0.26 155)
+  );
+}
+.size-btn-180:hover {
+  background: linear-gradient(135deg, oklch(0.62 0.24 55), oklch(0.52 0.26 45));
+}
+.size-btn-240:hover {
+  background: linear-gradient(135deg, oklch(0.52 0.26 30), oklch(0.44 0.28 20));
+}
+
+/* ── Orb decoration ── */
+@keyframes orb-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(12px, -8px) scale(1.03);
+  }
+  66% {
+    transform: translate(-8px, 6px) scale(0.97);
+  }
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.18;
+  animation: orb-drift 8s ease-in-out infinite;
+  pointer-events: none;
 }

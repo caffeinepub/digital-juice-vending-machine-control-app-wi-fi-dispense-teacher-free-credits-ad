@@ -20,7 +20,6 @@ export default function PaymentSuccess() {
   const getSessionStatus = useGetStripeSessionStatus();
   const dispenseViaWifi = useDispenseViaWifi();
 
-  // Stable refs so the one-time effect doesn't need them in the deps array
   const getSessionStatusRef = useRef(getSessionStatus.mutateAsync);
   const dispenseRef = useRef(dispenseViaWifi.mutateAsync);
   useEffect(() => {
@@ -47,14 +46,12 @@ export default function PaymentSuccess() {
       return;
     }
 
-    // Verify payment then attempt WiFi dispense
     getSessionStatusRef
       .current(sessionId)
       .then(async (status) => {
         if (status.__kind__ === "completed") {
           setVerificationStatus("success");
 
-          // Read pending juice data from sessionStorage
           const pendingJuice = sessionStorage.getItem("pendingJuice");
           const pendingSize = sessionStorage.getItem("pendingSize");
 
@@ -63,11 +60,9 @@ export default function PaymentSuccess() {
             return;
           }
 
-          // Clear sessionStorage immediately so we don't double-dispense on reload
           sessionStorage.removeItem("pendingJuice");
           sessionStorage.removeItem("pendingSize");
 
-          // Attempt WiFi dispense
           try {
             await dispenseRef.current({
               juice: pendingJuice,
@@ -94,16 +89,59 @@ export default function PaymentSuccess() {
   }, []);
 
   return (
-    <div className="container max-w-2xl py-16">
-      <Card>
-        <CardHeader className="text-center">
+    <div className="grand-bg min-h-screen flex items-center justify-center p-6 relative">
+      <div
+        className="orb"
+        style={{
+          width: 400,
+          height: 400,
+          top: -100,
+          left: "20%",
+          background: "oklch(0.55 0.22 140)",
+        }}
+      />
+      <div
+        className="orb"
+        style={{
+          width: 300,
+          height: 300,
+          bottom: -50,
+          right: "15%",
+          background: "oklch(0.65 0.22 85)",
+          animationDelay: "3s",
+        }}
+      />
+
+      <Card className="grand-card w-full max-w-md rounded-3xl border-0 overflow-hidden relative z-10">
+        <CardHeader
+          className="text-center pb-6 pt-8"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(0.20 0.07 275) 0%, oklch(0.14 0.04 280) 100%)",
+            borderBottom: "1px solid oklch(0.82 0.18 85 / 0.10)",
+          }}
+        >
           {verificationStatus === "verifying" && (
             <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              <div
+                className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+                style={{
+                  background: "oklch(0.82 0.18 85 / 0.12)",
+                  border: "1px solid oklch(0.82 0.18 85 / 0.25)",
+                }}
+              >
+                <Loader2
+                  className="h-8 w-8 animate-spin"
+                  style={{ color: "oklch(0.82 0.18 85)" }}
+                />
               </div>
-              <CardTitle className="text-2xl">Verifying Payment</CardTitle>
-              <CardDescription>
+              <CardTitle
+                className="font-display text-2xl font-bold"
+                style={{ color: "oklch(0.96 0.01 90)" }}
+              >
+                Verifying Payment
+              </CardTitle>
+              <CardDescription style={{ color: "oklch(0.55 0.04 270)" }}>
                 Please wait while we confirm your payment…
               </CardDescription>
             </>
@@ -111,11 +149,26 @@ export default function PaymentSuccess() {
 
           {verificationStatus === "success" && (
             <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-                <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+              <div
+                className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+                style={{
+                  background: "oklch(0.58 0.24 140 / 0.15)",
+                  border: "1px solid oklch(0.68 0.22 140 / 0.35)",
+                  boxShadow: "0 0 24px oklch(0.68 0.22 140 / 0.25)",
+                }}
+              >
+                <CheckCircle2
+                  className="h-8 w-8"
+                  style={{ color: "oklch(0.72 0.22 140)" }}
+                />
               </div>
-              <CardTitle className="text-2xl">Payment Successful!</CardTitle>
-              <CardDescription>
+              <CardTitle
+                className="font-display text-2xl font-bold"
+                style={{ color: "oklch(0.96 0.01 90)" }}
+              >
+                Payment Successful!
+              </CardTitle>
+              <CardDescription style={{ color: "oklch(0.55 0.04 270)" }}>
                 Your payment has been confirmed.
               </CardDescription>
             </>
@@ -123,18 +176,32 @@ export default function PaymentSuccess() {
 
           {verificationStatus === "error" && (
             <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-                <AlertCircle className="h-8 w-8 text-destructive" />
+              <div
+                className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
+                style={{
+                  background: "oklch(0.55 0.24 25 / 0.15)",
+                  border: "1px solid oklch(0.65 0.22 25 / 0.35)",
+                }}
+              >
+                <AlertCircle
+                  className="h-8 w-8"
+                  style={{ color: "oklch(0.68 0.22 25)" }}
+                />
               </div>
-              <CardTitle className="text-2xl">Verification Failed</CardTitle>
-              <CardDescription>
+              <CardTitle
+                className="font-display text-2xl font-bold"
+                style={{ color: "oklch(0.96 0.01 90)" }}
+              >
+                Verification Failed
+              </CardTitle>
+              <CardDescription style={{ color: "oklch(0.55 0.04 270)" }}>
                 We could not verify your payment.
               </CardDescription>
             </>
           )}
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 p-6">
           {verificationStatus === "success" && (
             <>
               {dispenseOutcome === "pending" && (
@@ -147,24 +214,18 @@ export default function PaymentSuccess() {
               )}
 
               {dispenseOutcome === "success" && (
-                <Alert
-                  data-ocid="dispense.success_state"
-                  className="border-green-500/50 bg-green-50 dark:bg-green-950/20"
-                >
-                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <AlertDescription className="text-green-700 dark:text-green-300">
+                <Alert data-ocid="dispense.success_state">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertDescription>
                     Your juice is being dispensed now!
                   </AlertDescription>
                 </Alert>
               )}
 
               {dispenseOutcome === "error" && (
-                <Alert
-                  data-ocid="dispense.error_state"
-                  className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20"
-                >
-                  <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                  <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+                <Alert data-ocid="dispense.error_state">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
                     Payment received but could not connect to the vending
                     machine. Please show this page to staff.
                   </AlertDescription>
@@ -192,8 +253,13 @@ export default function PaymentSuccess() {
 
           <Button
             onClick={() => navigate({ to: "/" })}
-            className="w-full"
-            variant="outline"
+            className="w-full font-extrabold rounded-xl py-5 border-0 shadow-lg transition-all duration-200 hover:scale-[1.02]"
+            style={{
+              background:
+                "linear-gradient(135deg, oklch(0.82 0.18 85) 0%, oklch(0.72 0.20 75) 100%)",
+              color: "oklch(0.12 0.04 280)",
+              boxShadow: "0 4px 20px oklch(0.82 0.18 85 / 0.35)",
+            }}
           >
             Return to Home
           </Button>

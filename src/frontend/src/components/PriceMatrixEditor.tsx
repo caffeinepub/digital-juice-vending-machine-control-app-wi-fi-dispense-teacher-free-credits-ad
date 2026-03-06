@@ -83,7 +83,8 @@ export default function PriceMatrixEditor() {
       <CardHeader>
         <CardTitle>Price Matrix</CardTitle>
         <CardDescription>
-          Set prices for each juice type and size combination (in cents)
+          Set prices for each juice type and size combination (enter amount in
+          rupees)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
